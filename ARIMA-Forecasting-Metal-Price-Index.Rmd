@@ -360,7 +360,7 @@ PMETAINDEXM]{.underline}
 
 ```{r}
 ARIMA.predict <- predict(arima(Metal2[1:350], order=c(1,1,1)), n.ahead = 12)
-ARIMA.forecast <- AR1.predict$pred
+ARIMA.forecast <- ARIMA.predict$pred
 ARIMA.Forecast.lower <- NULL
 ARIMA.Forecast.upper <- NULL
 for (i in seq_along(ARIMA.forecast)) {
