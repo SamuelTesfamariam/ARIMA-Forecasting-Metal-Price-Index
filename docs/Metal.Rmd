@@ -3,6 +3,8 @@ title: "Forecasting the Global Price of Metal Index using ARIMA Model"
 output:
   html_document:
     df_print: paged
+  html_notebook:
+    df_print: paged
 editor_options:
   markdown:
     wrap: 72
@@ -515,4 +517,3 @@ Using ARIMA Model. Journal of Advanced Management Science. Retrieved May
 Kwas, M., & Rubaszek, M. (2021, June 19). Forecasting commodity prices:
 Looking for a benchmark. MDPI. Retrieved May 13, 2022, from
 <https://www.mdpi.com/2571-9394/3/2/27>
-
