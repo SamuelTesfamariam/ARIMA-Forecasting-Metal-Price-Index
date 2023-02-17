@@ -133,7 +133,7 @@ method dictates re-identification (back to step 1).
 [Table 1: Properties of ACF, PACF for AR, MA & ARMA model
 identification:1]{.underline}
 
-![](images/ACF_PACF_TABLE.png){width="464"}
+![](docs/images/ACF_PACF_TABLE.png){width="467"}
 
 Table 1 shows the characteristics of the ACF and PACF graphs that can
 help us decide which model to choose.
@@ -161,7 +161,7 @@ relevant formulas of the aforementioned criteria.
 
 [Table 2: Fit Statistics:]{.underline}
 
-![](images/Fit%20Statistics.png){alt="Table 2: Fit Statistics:"}
+![](docs/images/Fit%20Statistics.png){alt="Table 2: Fit Statistics:"}
 
 \*Important Note: Tables 1 and 2 are adopted from Guha and Bandyopadhyay
 (2016)
@@ -200,7 +200,7 @@ summary(diff.adf)
 
 [Table 3: Results of the ADF Test:]{.underline}
 
-![](images/image-612317759.png){width="629"}
+![](docs/images/image-612317759.png)
 
 Table 3, top half, shows the ADF test results. The resulting special
 Dicky-Fuller t-statistics (called tau values) all fall within the "fail
@@ -313,7 +313,7 @@ Metal.resid.3 <- ts(Metal.resid.3[5:350],start=c(1992,1),frequency=12)
 
 [Table 4: Statistical Fits for ARIMA models attempted]{.underline}
 
-![](images/Statistical%20fits%20results.png)
+![](docs/images/Statistical%20fits%20results.png)
 
 From the statistical fits in Table 4 above, the ARIMA (1,1,1) shows
 superiority. Even though the model seems less adequate than the ARIMA
