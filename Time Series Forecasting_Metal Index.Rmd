@@ -1,0 +1,517 @@
+---
+title: "Forecasting the Global Price of Metal Index using ARIMA Model"
+output:
+  html_notebook:
+    df_print: paged
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+# 
+
+***Abstract***:
+
+Given the importance of metal to world economy, governments,
+corporations, and individual investors, it is vital that their future
+movements are predicted and managed. One way of forecasting metal prices
+at a global level is to use global data. One such series is the
+"PMETAINDEXM" (Federal Reserve Economic Data - FRED) for the Global
+Price of Metal Index (base metals). Using a time series model ARIMA
+(p,d,q), this paper adequately estimates and makes a 6 moth ahead
+forecast of the series. The Box-Jinkins method is used to identify,
+estimate, evaluate, and forecast the time series.
+
+**Introduction:**
+
+Metals are of great importance to the world economy today. Not only
+today, but metals have been one of the main fuelers of economic
+production for most of the recent human history. It is even safe to
+declare that that the industrial revolution of the 19th and 20th
+centuries in Great Britain and the United States were mainly fueled by
+metals (iron and steel). Although oil prices remain the center of
+attention when it comes to commodity price watchers, metal prices also
+require that we watch out for them. Dictated by the laws of economic
+demand and supply, the prices of metals demand special attention by
+almost all economies and industries. Today, in a widely connected world
+where most industries depend on global supply chains, it becomes
+important to assess the prices of metals at a global level. One of the
+main indicators used to follow the price of metals is the Global Price
+of Metal Index (FRED code: PMETAINDEXM). This index, sourced from the
+international economic organization, International Monetary Fund (IMF),
+represents the evolution of prices of base metals which include
+Aluminum, Copper, Iron Ore, Lead, Molybdenum, Nickel, Tin, Uranium, and
+Zinc. Due to the importance of base metals and the implications behind
+their demand and supply movements to the world economy, it becomes of
+great importance to model and forecast their prices. This paper is an
+attempt to use time series statistical techniques to estimate a model
+and and forecast the global price of metal using the historical data of
+the global price of metal index (PMETAINDEXM). The paper will use the
+ARIMA (Auto-Regressive Integrated Moving Average) model to forecast the
+base metals price index for the 6 months of March-August 2022.
+
+**Literature Review:**
+
+It is established in the relevant literature that forecasting commodity
+prices reliably is a debatable matter, this is considering that
+commodity prices turn out to be more volatile than stock prices. (Kwas &
+Rubaszek, 2021) Dooley and Linhan discuss the performance of linear
+autoregressive 2 models in forecasting metal prices of Zinc and Lead.
+(Dooley & Lenihan, 2005) They conclude that forecasting metal prices is
+difficult, however, their results suggest that ARIMA modelling provides
+marginally better forecast results than lagged forward price modelling.
+Although their analysis was only done for prices of Zinc and Lead, they
+suggest that the applications of their analysis are transferable and can
+be used to forecast other base metal prices.
+
+The use of ARIMA models (Box-Jenkins method) are fundamentally dependent
+on the stationarity of the time series in question, and so, it is
+crucial that the stationarity of metal price data is guaranteed before
+conducting any further analysis. Adewuyi and Wahab and Adeboye asses the
+stationarity of 4 precious (example gold) and 7 industarial metals
+(example Zinc). (Adewuyi & Wahab & Adeboye, 2020) They find that seven
+of the 11 metals assessed are stationary with some conventional unit
+root tests.
+
+**Data and Methodology:**
+
+This paper uses monthly global price of metal index data from the
+Federal Reserve Economic Data (FRED). The main source of the data is the
+International Monetary Fund (IMF). The data used for analysis runs from
+January 1992 to February 2022 (362 observations).
+
+[Figure 1: A plot of Global Price of Metal Index 1992-2022]{.underline}
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+#defaultW <- getOption("warn") 
+#options(warn = -1) 
+
+library(quantmod)
+library(car)
+library(tseries)
+library(forecast)
+library(urca)
+library(lmtest)
+
+#options(warn = defaultW)
+###################Data streaming from FRED###############
+start <- as.Date("1992-01-01") #January 1, 1992
+end <- as.Date("2022-02-01")   #February 1, 2022
+getSymbols("PMETAINDEXM", src = "FRED", from = start, to = end)
+
+PMETAINDEXM <- PMETAINDEXM[1:362]
+PMETAINDEXM <- ts(PMETAINDEXM[,"PMETAINDEXM"],start=c(1992,1), frequency=12)
+plot.ts(PMETAINDEXM, main="Global Price of Metal INDEX 1992 Jan - 2022 Feb")
+
+head(PMETAINDEXM, 10)
+```
+
+To identify an ARIMA model, the Box-Jenkins method was followed. This
+method uses the autocorrelations and partial autocorrelations of a
+series to identify the ARIMA model for estimation. The Box-Jenkins
+method has four general steps: Model Identification, Model Estimation,
+Model Evaluation, and finally Forecast. The properties of ACF and PACF
+of a series can guide us to identifying a tentative model. Once an ARIMA
+(or pure AR or MA) is identified, it is used to fit the time series data
+(Model Estimation). The evaluation step involves assessing the adequacy
+of the model using several statistical tests. The significance of the
+estimated coefficient(s) is checked, as well as checking the
+autocorrelations of the residuals and whether they amount into being
+just a white noise process. If the model is not adequate, then the
+method dictates re-identification (back to step 1).
+
+**ARIMA (p,d,q)**
+
+**p = order of autocorrelation (autoregressive term)**
+
+**d= order of integration (differencing)**
+
+**q= order of moving average**
+
+[Table 1: Properties of ACF, PACF for AR, MA & ARMA model
+identification:1]{.underline}
+
+![](ACF_PACF_TABLE.png){width="559"}
+
+Table 1 shows the characteristics of the ACF and PACF graphs that can
+help us decide which model to choose.
+
+However, ARIMA models makes an important assumption about the series,
+and that is the stationarity assumption. Simply put stationarity assumes
+that the mean and variance of a series are not dependent on time, or
+that they are constant over time. This assumption makes the test of unit
+root in a series a very important practice. This paper uses the
+Augmented Dickey-Fuller (ADF) test to test for the presence of unit
+root. The paper adopts the Ender's approach (Enders & Lee, 2010) to test
+for unit root in the PMETAINDEXM series. After, stationarity is
+achieved, we identify a model and estimate. The process as laid out
+above is iterated several times to reach an adequate model that can be
+used for out-of-sample forecasting.
+
+Several criteria's help us decide in the best model for forecasting.
+This paper assesses several criteria to decide between several models
+for forecasting the global price of metals index. These fit statistics
+include Root Mean Squared Erorr (RMSE), Mean Absolute Error (MAE), Mean
+Absolute Percent Error (MAPE), Akaike Information Criterion (AIC), and
+Baysian Information Criterion (BIC). These criteria all need to be
+minimized in the best model for forecasting. Refer to Table 2 for the
+relevant formulas of the aforementioned criteria.
+
+[Table 2: Fit Statistics:]{.underline}
+
+![](Fit%20Statistics.png){alt="Table 2: Fit Statistics:" width="425"}
+
+\*Important Note: Tables 1 and 2 are adopted from Guha and Bandyopadhyay
+(2016)
+
+![]()
+
+**Results and Discussion:**
+
+First is presented the results for the Augment Dickey Fuller test. The
+ADF test in its most general form is written as:
+
+**Δy~t~ = α~0~ + θ ~yt-1~ + α~2T~ + Σ β~i~ Δ~yt-i~ + ε~t~**
+
+Where: T= Time trend, α~0~ = Intercept (Drift), Σ β~i~ Δ~yt-I~ = lag
+augmentations of Δy~t.~
+
+For this monthly data, the paper follows the convention of using 12 lag
+augmentations in the ADF test.
+
+The null H0 : θ=0 is the hypothesis that the series has Unit root. The
+nature of most unit root tests, including the ADF test is biased to
+finding a unit root even at times when there isn't (type 1 error). As
+mentioned before, the paper adopts the Ender's approach (Enders & Lee,
+2010), suggested by Walter Enders, to test for unit root using the ADF
+test. The results of this process are summarized in Table 3 below.
+
+```{r}
+adf <- ur.df(log(PMETAINDEXM), type="trend", lags=12) # type: "none", "drift", "trend"
+summary(adf)
+```
+
+```{r}
+diff.adf <- ur.df(diff(log(PMETAINDEXM)), type="trend", lags=2) # type: "none", "drift", "trend"
+summary(diff.adf)
+```
+
+[Table 3: Results of the ADF Test:]{.underline}
+
+![](images/image-612317759.png){width="629"}
+
+Table 3, top half, shows the ADF test results. The resulting special
+Dicky-Fuller t-statistics (called tau values) all fall within the "fail
+to reject" zones at significance levels of 1, 5 and 10%. This expected
+because visually we can see that the data is in fact trending (upwards),
+and hence the mean of the data is not constant across time. Hence,
+unlike (Adewuyi & Wahab & Adeboye, 2020), I find that there is unit root
+presence in in the series, and so the series is non-stationary. Hence,
+first difference of the series is taken to make it stationary, and then
+the ADF test is conducted again, and the results are shown in the second
+half of Table 3. The results show that there is no statistical evidence
+for the presence of unit root.
+
+The plot below shows the eventual look of the series data in its
+stationary form.
+
+[Figure 2: A plot of Global Price of Metal Index 1992-2022 after Log
+Transformation and first-differencing]{.underline}
+
+```{r fig.height=3, fig.width=5}
+plot.ts(diff(log(PMETAINDEXM)), ylab = "Δlog(PMETAINDEXM)" , main = "Global Price of Metal INDEX 1992 Jan - 2022 Feb")
+```
+
+It is also noteworthy to point out why a pre-differencing transformation
+technique is used prior to testing stationarity. As can be seen on
+Figure 1 plot of the original series, beside the time trend, the
+volatility of the price index is not constant, especially with large
+fluctuations that happen in the period of and after the 2008 financial
+crisis recession. The paper employs one of the more common
+transformation techniques and that is the logarithmic transformation,
+which helps to "knock down" the variance of the series. Figure 2 below
+show the difference between a first difference of the log-transformed
+data and the untransformed data. The log helps stabilize the variance
+and make the series more stationary. Hence, the log transformed data is
+adopted to analyze and fit the data for the rest of this paper.
+
+[Figure 2: The use of log-transformation technique to stabilize the
+variance:]{.underline}
+
+```{r fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
+Metal1<-PMETAINDEXM
+Metal2<-log(PMETAINDEXM)
+Metal <- diff(log(PMETAINDEXM))
+par(mfrow=c(2,1))
+plot.ts(diff(PMETAINDEXM), main="First differenced(PMETAINDEXM)", ylab="ΔPMETAINDEXM")
+plot.ts(Metal, main="First differenced log(PMETAINDEXM)", ylab="Δlog(PMETAINDEXM)")
+```
+
+After assessing the ADF test results, first differencing is required to
+fit the model. After, the ACF (Correlogram) and the PACF plots are
+assessed to identify a model. Figure 3 shows the ACF and PACF graphs. At
+first glance, there is not a clear decaying pattern or quick cut off
+pattern to be followed. In fact, both the ACF and PACF seem to cut-off
+quickly. Hence, I try three different ARIMA (p,d,q) models: ARIMA
+(1,1,0), ARIMA (0,1,1), and finally ARIMA (1,1,1).
+
+[Figure 3: ACF and PACF plot:]{.underline}
+
+```{r fig.height=10, fig.width=15}
+par(mfrow=c(2,1), mai= c(1,1,1,0))
+acf(Metal, main="PMETAINDEXM")
+pacf(Metal, main="PMETAINDEXM")
+```
+
+```{r}
+########################Trying out different ARIMA models################
+####ARIMA(1,1,1)
+
+result1 <- arima(Metal2[1:350], order=c(1,1,1))
+summary(result1)
+coeftest1<- coeftest(result1)
+summary(coeftest1)
+BIC(result1)
+Metal.fitted.1 <- fitted(result1)   #result1$fitted.values
+Metal.resid.1 <- result1$residuals
+Metal_1 <- ts(Metal2[5:350],start=c(1992,1),frequency=12)
+Metal.fitted.1 <- ts(Metal.fitted.1[5:350],start=c(1992,1),frequency=12)
+Metal.resid.1 <- ts(Metal.resid.1[5:350],start=c(1992,1),frequency=12)
+```
+
+```{r}
+####ARIMA(1,1,0)
+
+result2 <- arima(Metal2[1:350], order=c(1,1,0))
+summary(result2)
+coeftest2<- coeftest(result2)
+summary(coeftest2)
+BIC(result2)
+Metal.fitted.2 <- fitted(result2) #result1$fitted.values
+Metal.resid.2 <- result2$residuals
+Metal_2 <- ts(Metal2[5:350],start=c(1992,1),frequency=12)
+Metal.fitted.2 <- ts(Metal.fitted.2[5:350],start=c(1992,1),frequency=12)
+Metal.resid.2 <- ts(Metal.resid.2[5:350],start=c(1992,1),frequency=12)
+```
+
+```{r}
+####ARIMA(0,1,1)
+
+result3 <- arima(Metal2[1:350], order=c(0,1,1))
+summary(result3)
+coeftest3<- coeftest(result3)
+summary(coeftest3)
+BIC(result3)
+Metal.fitted.3 <- fitted(result3) #result1$fitted.values
+Metal.resid.3 <- result3$residuals
+Metal_3 <- ts(Metal2[5:350],start=c(1992,1),frequency=12)
+Metal.fitted.3 <- ts(Metal.fitted.3[5:350],start=c(1992,1),frequency=12)
+Metal.resid.3 <- ts(Metal.resid.3[5:350],start=c(1992,1),frequency=12)
+```
+
+[Table 4: Statistical Fits for ARIMA models attempted]{.underline}
+
+![](Statistical%20fits%20results.png){width="837"}
+
+From the statistical fits in Table 4 above, the ARIMA (1,1,1) shows
+superiority. Even though the model seems less adequate than the ARIMA
+(0,1,1) model in the AIC criterion, it excels above others in its
+ability to minimize errors (RMSE, MAE, MAPE). Below is a plot of the
+models estimated fit to the data, and a graphing of its residuals for
+visual comparison (Figure 4). Then a separate ACF graph of the residuals
+is given. For an adequate ARIMA model the residuals should have a white
+noise process (that is that they do not contain significant
+autocorrelations that are not explained by the model).
+
+[Figure 4: ARIMA (1,1,1) Model Fit and Residual Plot]{.underline}
+
+```{r fig.height=5.5, fig.width=9}
+par(mfrow=c(1,2), mai= c(1,1.3,2,0))
+plot(Metal_1,type="l", yaxt='n', ylim=c(3,6), xlab="Time",ylab="Log(PMETAINDEXM)",col="black", main="ARIMA(1,1,1)") +
+lines(Metal.fitted.1, col="red", lty=1)
+axis(side=2,at=seq(3,6, by=1),lab=seq(3,6, by=1),cex.axis=0.8)
+par(new=T)
+plot(Metal.resid.1,col="blue", axes=FALSE, ylim=c(-1.5,1.5), xlab="",ylab="")
+abline(h=0,col="black")
+abline(h=0.1,col="black",lty="dashed")
+abline(h=-0.1,col="black",lty="dashed")
+axis(side=4,at=seq(-0.3,0.3, by=0.1),lab=seq(-0.3,0.3, by=0.1) ,cex.axis=0.6)
+legend("topleft",c("Residual","Actual","Fitted"),lty=c(1,1),col=c("blue","black","red"),cex=0.6)
+acf(Metal.resid.1, main = "Auto-Correlations of Residuals", xlim=c(0,2))
+```
+
+Finally, after identification, estimation and evaluation, the last step
+is to use the model to forecast future values of the global price of
+metal index. Before making out-of-sample forecasting, I make a
+pseudo-out-of-sample forecast. That is, of the 362 monthly observation
+(January 1992 to February 2022), I hold out 12 months and use 350
+observations to estimate the model ARIMA (1,1,1). I then forecast these
+12 months (March 2021 to February 2022). The result of this forecast can
+be shown in Figure 5. The forecast represented by the blue line is close
+to the actual data for the forecast period (after dashed vertical line).
+The actual values fall within the confidence intervals of the forecast
+(95% confidence). This shows that the model can be used for actual out
+of sample forecasting.
+
+[Figure 5: Pseudo-Out-of-Sample Forecasting Vs. Actual Values of
+PMETAINDEXM]{.underline}
+
+```{r}
+ARIMA.predict <- predict(arima(Metal2[1:350], order=c(1,1,1)), n.ahead = 12)
+ARIMA.forecast <- AR1.predict$pred
+ARIMA.Forecast.lower <- NULL
+ARIMA.Forecast.upper <- NULL
+for (i in seq_along(ARIMA.forecast)) {
+ARIMA.Forecast.lower[36+i] <- ARIMA.forecast[i]-(ARIMA.predict$se[i]*1.96)
+ARIMA.Forecast.upper[36+i] <- ARIMA.forecast[i]+(ARIMA.predict$se[i]*1.96)
+}
+Metal.history <- Metal2[314:361]
+Metal.history <- as.ts(Metal.history, frequency=12)
+Metal.forecast <- NULL
+for (j in seq_along(ARIMA.forecast)) {
+Metal.forecast[36+j] <- ARIMA.forecast[j]
+}
+Metal.forecast <- as.ts(Metal.forecast, frequency=12)
+par(mfrow=c(1,1))
+plot(Metal.history, type="l",xlim=c(0,48),ylim=c(3,7), ylab="Log(PMETAINDEXM)",xlab="Time",axes=F, main="PMETAINDEXM: ARIMA (1,1,1) Forecast and History")
+lines(Metal.forecast, col="blue")
+12
+lines(ARIMA.Forecast.lower,col="red",lty=2)
+lines(ARIMA.Forecast.upper,col="red",lty=2)
+box()
+axis(side=1, at=seq(0,48, by=2), lab=seq(0,48, by=2)) #,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37))
+axis(side=2, at=seq(3,7,by=1))
+abline(v=37,lty="dashed")
+legend("topleft",c("Forecast","Actual","Confidence Intervals"),lty=c(1,1),col=c("blue","black","red"),cex=1)
+
+```
+
+Figure 6 shows the final forecast of the next 6 months (March - August
+of 2022) for the global price of metals Index using ARIMA (1,1,1).
+
+[Figure 6: 6-month Horizon forecast of Global Price of Metal Index using
+ARIMA (1,1,1)]{.underline}
+
+```{r}
+#####################6 months Forecast by ARIMA(1,1,1) Model: graph of whole sample###########
+ARIMA.predict <- predict(arima(Metal2[1:362], order=c(1,1,1)), n.ahead = 6)
+ARIMA.forecast <- ARIMA.predict$pred
+ARIMA.Forecast.lower <- NULL
+ARIMA.Forecast.upper <- NULL
+13
+for (i in seq_along(ARIMA.forecast)) {
+ARIMA.Forecast.lower[200+i] <- ARIMA.forecast[i]-(ARIMA.predict$se[i]*1.96)
+ARIMA.Forecast.upper[200+i] <- ARIMA.forecast[i]+(ARIMA.predict$se[i]*1.96)
+}
+Metal.history <- Metal2[162:362]
+Metal.history <- as.ts(Metal.history, frequency=12)
+Metal.forecast <- NULL
+for (j in seq_along(ARIMA.forecast)) {
+Metal.forecast[200+j] <- ARIMA.forecast[j]
+}
+Metal.forecast <- as.ts(Metal.forecast, frequency=12)
+par(mfrow=c(1,1))
+plot(Metal.history, type="l",xlim=c(0,207),ylim=c(3,7), ylab="Log(PMETAINDEXM)",xlab="Time",axes=F, main="PMETAINDEXM: ARIMA (1,1,1) 6 months ahead Forecast")
+lines(Metal.forecast, col="blue")
+lines(ARIMA.Forecast.lower,col="red",lty=2)
+lines(ARIMA.Forecast.upper,col="red",lty=2)
+box()
+axis(side=1, at=seq(0,206, by=20), lab=seq(0,206, by=20)) #,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37))
+axis(side=2, at=seq(3,7,by=1))
+abline(v=201,lty="dashed")
+legend("topleft",c("Forecast","Actual","Confidence Intervals"),lty=c(1,1),col=c("blue","black","red"),cex=1)
+```
+
+```{r}
+#####################6 months Forecast by ARIMA(1,1,1) Model###########
+ARIMA.predict <- predict(arima(Metal2[1:362], order=c(1,1,1)), n.ahead = 6)
+ARIMA.forecast <- ARIMA.predict$pred
+ARIMA.Forecast.lower <- NULL
+ARIMA.Forecast.upper <- NULL
+for (i in seq_along(ARIMA.forecast)) {
+ARIMA.Forecast.lower[24+i] <- ARIMA.forecast[i]-(ARIMA.predict$se[i]*1.96)
+ARIMA.Forecast.upper[24+i] <- ARIMA.forecast[i]+(ARIMA.predict$se[i]*1.96)
+}
+Metal.history <- Metal2[338:362]
+Metal.history <- as.ts(Metal.history, frequency=12)
+Metal.forecast <- NULL
+for (j in seq_along(ARIMA.forecast)) {
+Metal.forecast[24+j] <- ARIMA.forecast[j]
+}
+Metal.forecast <- as.ts(Metal.forecast, frequency=12)
+par(mfrow=c(1,1))
+plot(Metal.history, type="l",xlim=c(0,30),ylim=c(3,7), ylab="Log(PMETAINDEXM)",xlab="Time",axes=F, main="PMETAINDEXM: ARIMA (1,1,1) 6 months ahead Forecast")
+lines(Metal.forecast, col="blue")
+lines(ARIMA.Forecast.lower,col="red",lty=2)
+lines(ARIMA.Forecast.upper,col="red",lty=2)
+box()
+axis(side=1, at=seq(0,30, by=4), lab=seq(0,30, by=4)) #,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37))
+axis(side=2, at=seq(3,7,by=1))
+abline(v=25,lty="dashed")
+legend("topleft",c("Forecast","Actual","Confidence Intervals"),lty=c(1,1),col=c("blue","black","red"),cex=1)
+```
+
+[**Important Note:**]{.underline}
+
+Please note that the forecasting of the data is done using the
+log-transformed data, since that is the data I used to fit the model.
+Hence why the first graph of the forecast does not resemble the original
+data plot (figure 1).
+
+**Conclusion:**
+
+Given the importance of metal to world economy, governments,
+corporations and individual investors, it is vital that their future
+movements are predicted and managed. One way of forecasiting metal
+prices at a global level is to use global data. One such series is the
+"PMETAINDEXM" (FRED) for the Global Price of Metal Index (base metals).
+Using a time series model (ARIMA (p,d,q)), this paper adequately
+estimates and makes a 6 moth ahead forecast of the series. The
+Box-Jinkins method is used to identify, estimate, evaluate and forecast
+the time series.
+
+I suggest further study to be done in the unit root process that exist
+in the index despite previous research showing that the price of
+individual metals is stationary. Further investigations should explore
+the short to medium term implications of the non-stationarity
+(unit-root) of the index.
+
+I should also point to the obvious inadequacy of ARIMA models being
+linear models. ARIMAs fail to predict turning points, as can be seen
+from the prediction made on the test data in figure 5. *(I think it
+would be interesting to run this data through some machine learning
+models and compare the performance metrics against ARIMA.)*
+
+Another important note here is that there is clearly a subjective
+component when deciding on the best model to use for estimation. So,
+perhaps other people can also try to fit different models and see if
+they can obtain better results.
+
+**References:**
+
+Adewuyi, O.A., & Wahab, A.B., Adeboye, S.O (2020, March). Stationarity
+of prices of precious and industrial metals using recent unit root
+methods: Implications for markets' efficiency. Resources Policy.
+Retrieved May 13, 2022, from
+<https://www.sciencedirect.com/science/article/abs/pii/S0301420719305987?via%3Dihubhttps://www.mdpi.com/2571-9394/3/2/27>
+
+Dooley, G., & Lenihan, H. (2005, September). An assessment of time
+series methods in metal price forecasting. Resources Policy. Retrieved
+May 13, 2022, from
+<https://www.sciencedirect.com/science/article/abs/pii/S0301420705000413>
+
+Enders, W., & Lee, J. (2010, April 18). A unit root test using a Fourier
+... - wenders.people.ua.edu. Wenders.people.ua.edu. Retrieved May 14,
+2022, from
+<https://wenders.people.ua.edu/uploads/2/6/3/8/26382715/enders_lee_april_18_2010.pdf>
+
+FRED: <https://fred.stlouisfed.org/series/PMETAINDEXMR>
+
+Guha, B., & Bandyopadhyay, G., (2016, March). Gold Price Forecasting
+Using ARIMA Model. Journal of Advanced Management Science. Retrieved May
+13, 2022, from
+<http://www.joams.com/uploadfile/2015/0407/20150407040907791.pdf27>
+
+Kwas, M., & Rubaszek, M. (2021, June 19). Forecasting commodity prices:
+Looking for a benchmark. MDPI. Retrieved May 13, 2022, from
+<https://www.mdpi.com/2571-9394/3/2/27>
